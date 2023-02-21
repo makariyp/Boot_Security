@@ -33,14 +33,13 @@ public class AdminController {
     @GetMapping(value = "/admin/add")
     public String addForm(ModelMap model) {
         model.addAttribute("user", new User());
-        List<Role> roles = roleDao.findAll();
+        Set<Role> roles = Set.copyOf(roleDao.findAll());
         model.addAttribute("allRoles", roles);
         return "admin/add";
     }
 
     @PostMapping(value = "/admin/add")
-    public String addSubmit(@ModelAttribute User user, @ModelAttribute List<Role> roles) {
-        user.setRoles(Set.copyOf(roles));
+    public String addSubmit(@ModelAttribute User user) {
         userService.addUser(user);
         return "redirect:/admin";
     }
