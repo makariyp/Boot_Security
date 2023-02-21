@@ -11,6 +11,18 @@
     <p>Возраст: <input type="text" th:field="*{age}" th:value="*{age}"/></p>
     <p>E-mail: <input type="text" th:field="*{email}" th:value="*{email}" th:charset="utf-8"/></p>
     <p>Пароль: <input type="text" th:field="*{password}" th:value="*{password}" th:charset="utf-8"/></p>
+
+    <p>
+        <label>Roles:
+            <input type="checkbox" name="roles"
+                   th:each="role : ${allRoles}"
+                   th:text="${role.name}"
+                   th:value="${role.id}"
+                   th:field="*{roles}"
+                   th:selected="${user.roles.contains(role)}"
+            />
+        </label>
+    </p>
     <p><input type="submit" value="Изменить"/></p>
 </form>
 </body>

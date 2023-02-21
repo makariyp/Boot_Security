@@ -53,6 +53,8 @@ public class AdminController {
     @GetMapping(value = "/admin/edit/{id}")
     public String editPage(@PathVariable("id") Long id, ModelMap model) {
         model.addAttribute("user", userService.getById(id));
+        Set<Role> roles = Set.copyOf(roleDao.findAll());
+        model.addAttribute("allRoles", roles);
         return "admin/edit";
     }
 
