@@ -48,7 +48,6 @@ public class UserServiceImpl implements UserService {
         return userDao.getById(id);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public User findByName(String username) {
         return userDao.findByName(username);

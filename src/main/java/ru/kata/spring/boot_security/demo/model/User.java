@@ -16,7 +16,7 @@ public class User implements UserDetails {
     private Integer age;
     private String email;
     private String password;
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
     private Set<Role> roles;
 
     public User() {

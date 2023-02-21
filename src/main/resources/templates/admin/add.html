@@ -7,11 +7,23 @@
 </head>
 <body>
 <h1>Добавить нового пользователя</h1>
-<form action="#" th:action="@{admin/add}" th:object="${user}" method="post">
+<form action="#" th:action="@{/admin/add}" th:object="${user}" method="post">
     <p>Никнейм: <input type="text" th:field="*{name}" th:charset="utf-8"/></p>
     <p>Возраст: <input type="text" th:field="*{age}"/></p>
     <p>E-mail: <input type="text" th:field="*{email}" th:charset="utf-8"/></p>
     <p>Пароль: <input type="text" th:field="*{password}" th:charset="utf-8"/></p>
+
+    <p>
+        <label>Roles:
+            <input type="checkbox" name="roles"
+                   th:each="role : ${allRoles}"
+                   th:text="${role.name}"
+                   th:value="${role.id}"
+                   th:field="*{roles}"
+            />
+        </label>
+    </p>
+
     <p><input type="submit" value="Добавить"/></p>
 </form>
 </body>

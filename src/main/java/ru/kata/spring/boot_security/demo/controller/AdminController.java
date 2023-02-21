@@ -4,17 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.dao.RoleDao;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
+
+import java.util.List;
+import java.util.Set;
 
 @Controller
 public class AdminController {
     private final UserService userService;
+    private RoleDao roleDao;
 
     @Autowired
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, RoleDao roleDao) {
         this.userService = userService;
+        this.roleDao = roleDao;
     }
+
 
     @GetMapping(value = "/admin")
     public String getIndex(ModelMap model) {
@@ -25,11 +33,14 @@ public class AdminController {
     @GetMapping(value = "/admin/add")
     public String addForm(ModelMap model) {
         model.addAttribute("user", new User());
+        List<Role> roles = roleDao.findAll();
+        model.addAttribute("allRoles", roles);
         return "admin/add";
     }
 
     @PostMapping(value = "/admin/add")
-    public String addSubmit(@ModelAttribute User user) {
+    public String addSubmit(@ModelAttribute User user, @ModelAttribute List<Role> roles) {
+        user.setRoles(Set.copyOf(roles));
         userService.addUser(user);
         return "redirect:/admin";
     }

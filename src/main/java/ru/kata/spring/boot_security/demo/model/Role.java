@@ -8,9 +8,11 @@ import java.util.Set;
 @Entity
 public class Role implements GrantedAuthority {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @ManyToMany()
+
+    @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
     public Role() {

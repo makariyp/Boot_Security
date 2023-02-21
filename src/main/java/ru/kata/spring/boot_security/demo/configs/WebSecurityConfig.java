@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import ru.kata.spring.boot_security.demo.dao.RoleDao;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
@@ -20,7 +21,8 @@ import java.util.Set;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final SuccessUserHandler successUserHandler;
-    public UserService userService;
+    private UserService userService;
+    private RoleDao roleDao;
 
     public WebSecurityConfig(SuccessUserHandler successUserHandler) {
         this.successUserHandler = successUserHandler;
@@ -31,6 +33,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.userService = userService;
     }
 
+    @Autowired
+    public void setRoleDao(RoleDao roleDao) {
+        this.roleDao = roleDao;
+    }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -49,6 +55,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     @Override
     public UserDetailsService userDetailsService() {
+        if (roleDao.findByName("ROLE_USER") == null || roleDao.findByName("ROLE_ADMIN") == null) {
+            roleDao.save(new Role("ROLE_USER"));
+            roleDao.save(new Role("ROLE_ADMIN"));
+        }
+        if (userService.findByName("admin") == null) {
+            User admin = new User();
+            admin.setName("admin");
+            admin.setPassword("admin");
+            admin.setRoles(Set.of(roleDao.findByName("ROLE_ADMIN"), roleDao.findByName("ROLE_USER")));
+            userService.save(admin);
+        }
         return name -> {
             User user = userService.findByName(name);
             if (user == null) {
