@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <title>Изменить</title>
+</head>
+<body>
+<form action="#" th:action="@{admin/edit}" th:object="${user}" th:method="PATCH">
+    <input type="hidden" th:field="*{id}" th:value="*{id}"/>
+    <p>Никнейм: <input type="text" th:field="*{name}" th:value="*{name}" th:charset="utf-8"/></p>
+    <p>Возраст: <input type="text" th:field="*{age}" th:value="*{age}"/></p>
+    <p>E-mail: <input type="text" th:field="*{email}" th:value="*{email}" th:charset="utf-8"/></p>
+    <p>Пароль: <input type="text" th:field="*{password}" th:value="*{password}" th:charset="utf-8"/></p>
+    <p><input type="submit" value="Изменить"/></p>
+</form>
+</body>
+</html>

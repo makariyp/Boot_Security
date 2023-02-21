@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <style>
+        table {
+            width: 100%;
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        table thead th {
+            font-weight: bold;
+            text-align: left;
+            border: none;
+            padding: 10px 15px;
+            background: #d8d8d8;
+            font-size: 14px;
+        }
+
+        table thead tr th:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        table thead tr th:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        table tbody td {
+            text-align: left;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        table tbody tr:nth-child(even) {
+            background: #f3f3f3;
+        }
+
+        table tbody tr td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        table tbody tr td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .btn-link {
+            border: none;
+            outline: none;
+            background: none;
+            cursor: pointer;
+            color: #0000EE;
+            padding: 0;
+            text-decoration: underline;
+            font-family: inherit;
+            font-size: inherit;
+        }
+    </style>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
+    <title>Пользователи</title>
+</head>
+<body>
+<div>
+    <a href="admin/add">Добавть нового пользователя</a>
+    <table>
+        <tr>
+            <th>id</th>
+            <th>Никнейм</th>
+            <th>Возраст</th>
+            <th>E-mail</th>
+            <th>Опции</th>
+        </tr>
+        <th:block th:each="user : ${users}">
+            <tr>
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.name}"></td>
+                <td th:text="${user.age}"></td>
+                <td th:text="${user.email}"></td>
+                <td>
+                    <a href="#" th:href="@{admin/edit/{linkTitle}(linkTitle=${user.id})}" th:text="Изменить"></a>
+                    <form th:action="@{admin/delete/{id}(id=${user.id})}" th:method="DELETE">
+                        <button type='submit' name='your_name' value='your_value' class='btn-link'>Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        </th:block>
+    </table>
+</div>
+</body>
+</html>
