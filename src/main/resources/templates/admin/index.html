@@ -1,93 +1,145 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<html lang="en">
 <head>
-    <style>
-        table {
-            width: 100%;
-            border: none;
-            margin-bottom: 20px;
-        }
-
-        table thead th {
-            font-weight: bold;
-            text-align: left;
-            border: none;
-            padding: 10px 15px;
-            background: #d8d8d8;
-            font-size: 14px;
-        }
-
-        table thead tr th:first-child {
-            border-radius: 8px 0 0 8px;
-        }
-
-        table thead tr th:last-child {
-            border-radius: 0 8px 8px 0;
-        }
-
-        table tbody td {
-            text-align: left;
-            border: none;
-            padding: 10px 15px;
-            font-size: 14px;
-            vertical-align: top;
-        }
-
-        table tbody tr:nth-child(even) {
-            background: #f3f3f3;
-        }
-
-        table tbody tr td:first-child {
-            border-radius: 8px 0 0 8px;
-        }
-
-        table tbody tr td:last-child {
-            border-radius: 0 8px 8px 0;
-        }
-
-        .btn-link {
-            border: none;
-            outline: none;
-            background: none;
-            cursor: pointer;
-            color: #0000EE;
-            padding: 0;
-            text-decoration: underline;
-            font-family: inherit;
-            font-size: inherit;
-        }
-    </style>
+    <title>Админка</title>
     <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
-    <title>Пользователи</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
 </head>
 <body>
-<a href="/logout">Выйти</a>
-<div>
-    <a href="admin/add">Добавть нового пользователя</a>
-    <table>
-        <tr>
-            <th>id</th>
-            <th>Никнейм</th>
-            <th>Возраст</th>
-            <th>E-mail</th>
-            <th>Опции</th>
-        </tr>
-        <th:block th:each="user : ${users}">
-            <tr>
-                <td th:text="${user.id}"></td>
-                <td th:text="${user.name}"></td>
-                <td th:text="${user.age}"></td>
-                <td th:text="${user.email}"></td>
-                <td>
-                    <a href="#" th:href="@{admin/edit/{linkTitle}(linkTitle=${user.id})}" th:text="Изменить"></a>
-                    <form th:action="@{admin/delete/{id}(id=${user.id})}" th:method="DELETE">
-                        <button type='submit' name='your_name' value='your_value' class='btn-link'>Удалить</button>
+
+<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <p class="navbar-brand col-md-3 col-lg-2 me-0 px-3" th:text="|${user.name} с правами ${user.roles}|"></p>
+    <div class="navbar-nav">
+        <div class="nav-item text-nowrap">
+            <a class="nav-link px-3" href="/logout">Выйти</a>
+        </div>
+    </div>
+</header>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse nav flex-column">
+            <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <br>
+                <a class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" href="#v-pills-home" role="tab"
+                   aria-controls="v-pills-home" aria-selected="true">Админ</a>
+                <a class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" href="#v-pills-profile" role="tab"
+                   aria-controls="v-pills-profile" aria-selected="false">Профиль</a>
+            </div>
+        </nav>
+
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light">
+            <div class="chartjs-size-monitor">
+                <div class="chartjs-size-monitor-expand">
+                    <div class=""></div>
+                </div>
+                <div class="chartjs-size-monitor-shrink">
+                    <div class=""></div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Панель администратора</h1>
+            </div>
+
+            <nav class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab"
+                   aria-controls="nav-home" aria-selected="true">Пользователи</a>
+                <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" href="#nav-profile" role="tab"
+                   aria-controls="nav-profile" aria-selected="false">Новый пользователь</a>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                    <br>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">id</th>
+                            <th scope="col">Никнейм</th>
+                            <th scope="col">Возраст</th>
+                            <th scope="col">E-Mail</th>
+                            <th scope="col">Роли</th>
+                            <th scope="col">Редактировать</th>
+                            <th scope="col">Удалить</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <th:block th:each="user : ${users}">
+                            <tr>
+                                <th scope="row" th:text="${user.id}"></th>
+                                <td th:text="${user.name}"></td>
+                                <td th:text="${user.age}"></td>
+                                <td th:text="${user.email}"></td>
+                                <td th:text="${user.roles}"></td>
+                                <td>
+                                    <form th:action="@{admin/edit/{linkTitle}(linkTitle=${user.id})}">
+                                        <button type="submit" class="btn btn-info">Редактировать</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form th:action="@{admin/delete/{id}(id=${user.id})}" th:method="DELETE">
+                                        <button type="submit" class="btn btn-danger">Удалить</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                    <br>
+                    <form action="#" th:action="@{/admin}" th:object="${newUser}" method="post">
+                        <div class="row mb-3">
+                            <label for="inputNik" class="col-sm-2 col-form-label">Никнейм</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputNik" th:field="*{name}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="inputAge" class="col-sm-2 col-form-label">Возраст</label>
+                            <div class="col-sm-10">
+                                <input type="number" class="form-control" id="inputAge" th:field="*{age}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" id="inputEmail" th:field="*{email}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" id="inputPassword" th:field="*{password}">
+                            </div>
+                        </div>
+
+<!--                        <select class="form-select" aria-label="Default select">-->
+<!--                            <option th:each="role : ${allRoles}"-->
+<!--                                    th:text="${role.name}"-->
+<!--                                    th:value="${role.id}"-->
+<!--                                    th:field="*{roles}"></option>-->
+<!--                        </select>-->
+
+                        <div class="form-check form-check-inline" th:each="role : ${allRoles}">
+                            <input class="form-check-input" type="checkbox" th:value="${role.id}"
+                                   th:field="*{roles}">
+                            <label class="form-check-label" th:text="${role.name}"></label>
+                        </div>
+
+                        <br>
+                        <button type="submit" class="btn btn-success">Создать</button>
                     </form>
-                </td>
-            </tr>
-        </th:block>
-    </table>
+                </div>
+            </div>
+        </main>
+    </div>
 </div>
+
 </body>
 </html>

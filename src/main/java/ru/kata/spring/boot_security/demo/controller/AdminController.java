@@ -1,7 +1,7 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -26,20 +26,17 @@ public class AdminController {
 
     @GetMapping(value = "/admin")
     public String getIndex(ModelMap model) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        model.addAttribute("user", user);
         model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("newUser", new User());
+        Set<Role> roles = Set.copyOf(roleDao.findAll());
+        model.addAttribute("allRoles", roles);
         return "admin/index";
     }
 
-    @GetMapping(value = "/admin/add")
-    public String addForm(ModelMap model) {
-        model.addAttribute("user", new User());
-        Set<Role> roles = Set.copyOf(roleDao.findAll());
-        model.addAttribute("allRoles", roles);
-        return "admin/add";
-    }
-
-    @PostMapping(value = "/admin/add")
-    public String addSubmit(@ModelAttribute User user) {
+    @PostMapping(value = "/admin")
+    public String addUser(@ModelAttribute User user) {
         userService.addUser(user);
         return "redirect:/admin";
     }
