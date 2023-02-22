@@ -4,8 +4,10 @@
     <title>Spring Security Example</title>
 </head>
 <body>
-<h1>User, welcome spring boot security page!</h1>
-
-
+<a href="/logout">Выйти</a>
+<h1>Мой профиль:</h1>
+Никнейм: <p th:text="${user.name}"></p>
+E-Mail: <p th:text="${user.email}"></p>
+Возраст: <p th:text="${user.age}"></p>
 </body>
 </html>

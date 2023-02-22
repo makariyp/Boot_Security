@@ -6,6 +6,7 @@
     <title>Добавить нового пользователя</title>
 </head>
 <body>
+<a href="/logout">Выйти</a>
 <h1>Добавить нового пользователя</h1>
 <form action="#" th:action="@{/admin/add}" th:object="${user}" method="post">
     <p>Никнейм: <input type="text" th:field="*{name}" th:charset="utf-8"/></p>

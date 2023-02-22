@@ -5,7 +5,8 @@
     <title>Изменить</title>
 </head>
 <body>
-<form action="#" th:action="@{/edit}" th:object="${user}" th:method="PATCH">
+<a href="/logout">Выйти</a>
+<form action="#" th:action="@{/admin/edit}" th:object="${user}" th:method="PATCH">
     <input type="hidden" th:field="*{id}" th:value="*{id}"/>
     <p>Никнейм: <input type="text" th:field="*{name}" th:value="*{name}" th:charset="utf-8"/></p>
     <p>Возраст: <input type="text" th:field="*{age}" th:value="*{age}"/></p>
