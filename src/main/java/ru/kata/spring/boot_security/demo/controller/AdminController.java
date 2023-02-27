@@ -10,12 +10,14 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.security.Principal;
 import java.util.Set;
 
+@RequestMapping("/admin")
 @Controller
 public class AdminController {
     private final UserService userService;
-    private RoleDao roleDao;
+    private final RoleDao roleDao;
 
     @Autowired
     public AdminController(UserService userService, RoleDao roleDao) {
@@ -24,7 +26,7 @@ public class AdminController {
     }
 
 
-    @GetMapping(value = "/admin")
+    @GetMapping
     public String getIndex(ModelMap model) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         model.addAttribute("user", user);
@@ -35,27 +37,19 @@ public class AdminController {
         return "admin/index";
     }
 
-    @PostMapping(value = "/admin/add")
+    @PostMapping(value = "add")
     public String addUser(@ModelAttribute User user) {
         userService.addUser(user);
         return "redirect:/admin";
     }
 
-    @DeleteMapping(value = "/admin/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id) {
-        userService.deleteUser(id);
+    @DeleteMapping(value = "delete")
+    public String deleteUser(@ModelAttribute User user) {
+        userService.deleteUser(user.getId());
         return "redirect:/admin";
     }
 
-    @GetMapping(value = "/admin/edit/{id}")
-    public String editPage(@PathVariable("id") Long id, ModelMap model) {
-        model.addAttribute("user", userService.getById(id));
-        Set<Role> roles = Set.copyOf(roleDao.findAll());
-        model.addAttribute("allRoles", roles);
-        return "admin/edit";
-    }
-
-    @PatchMapping(value = "/admin/edit")
+    @PatchMapping(value = "edit")
     public String editSubmit(@ModelAttribute User user) {
         userService.updateUser(user);
         return "redirect:/admin";

@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void addUser(User user) {
+        if (userDao.findByName(user.getName()) != null) return;
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userDao.save(user);
     }
@@ -44,13 +45,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void updateUser(User user) {
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userDao.save(user);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public User getById(Long id) {
-        return userDao.getById(id);
     }
 
     @Transactional(readOnly = true)
@@ -59,9 +55,4 @@ public class UserServiceImpl implements UserService {
         return userDao.findByName(username);
     }
 
-    @Transactional
-    @Override
-    public User save(User user) {
-        return userDao.save(user);
-    }
 }
