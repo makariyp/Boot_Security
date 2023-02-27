@@ -7,7 +7,6 @@ import ru.kata.spring.boot_security.demo.model.User;
 
 @Repository
 public interface UserDao extends JpaRepository<User, Long> {
-    User getById(Long id);
     @Query("from User user join fetch user.roles c where user.name = ?1")
     User findByName(String username);
 }
