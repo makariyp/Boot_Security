@@ -55,4 +55,9 @@ public class UserServiceImpl implements UserService {
         return userDao.findByName(username);
     }
 
+    @Override
+    public User findById(Long id) {
+        return userDao.findById(id).orElse(null);
+    }
+
 }

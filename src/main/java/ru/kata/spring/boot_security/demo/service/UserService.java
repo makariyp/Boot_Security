@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.kata.spring.boot_security.demo.model.User;
 
@@ -17,4 +18,5 @@ public interface UserService {
 
     User findByName(String username);
 
+    User findById(Long id);
 }
