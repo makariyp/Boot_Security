@@ -54,7 +54,7 @@ public class AdminRestController {
     @PostMapping(value = "add")
     public ResponseEntity<User> addUser(@RequestBody User user) {
         userService.addUser(user);
-        return new ResponseEntity<>(userService.findByName(user.getName()), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.findById(user.getId()), HttpStatus.CREATED);
     }
 
     @DeleteMapping(value = "delete")
