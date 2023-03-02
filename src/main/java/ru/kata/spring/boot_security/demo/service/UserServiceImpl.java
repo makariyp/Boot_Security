@@ -55,4 +55,17 @@ public class UserServiceImpl implements UserService {
         return userDao.findByName(username);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public User findWithRoles(String name) {
+        User user = userDao.findByName(name);
+        user.getRoles().size();
+        return user;
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userDao.findById(id).orElse(null);
+    }
+
 }

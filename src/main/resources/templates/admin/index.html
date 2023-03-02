@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <!--    Добавление польлзователя-->
+    <!--    <script>-->
+    <!--        const data = {-->
+    <!--            name: "user1", password: "user1", roles: [{-->
+    <!--                id: 1,-->
+    <!--                name: "ROLE_USER"-->
+    <!--            }]-->
+    <!--        };-->
+
+    <!--        fetch("http://localhost:8080/api/admin/add", {-->
+    <!--            method: "POST", // or 'PUT'-->
+    <!--            headers: {-->
+    <!--                "Content-Type": "application/json",-->
+    <!--            },-->
+    <!--            body: JSON.stringify(data),-->
+    <!--        })-->
+    <!--            .then((response) => response.json())-->
+    <!--            .then((data) => {-->
+    <!--                console.log("Success:", data);-->
+    <!--            })-->
+    <!--            .catch((error) => {-->
+    <!--                console.error("Error:", error);-->
+    <!--            });-->
+    <!--    </script>-->
+
+
     <title>Админка</title>
     <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -9,9 +35,58 @@
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <!--    Заполнение модального окна для изменения данных пользователя-->
     <script>
         $(function () {
-            $(".btnmod").click(
+            $(document).ready(function () {
+                updateTable();
+            })
+
+            function addUser(user) {
+                const s = `<tr id="${'tr' + user.id}">
+                                   <th>${user.id}</th>
+                                   <td>${user.name}</td>
+                                   <td>${user.age}</td>
+                                   <td>${user.email}</td>
+                                   <td>${user.roles.reduce((s, i) => s + i.name.replaceAll("ROLE_", "") + " ", "")}</td>
+                                   <td>
+                                    <button type="button" class="btn btn-info btnmod" data-bs-toggle="modal"
+                                            data-bs-target='#mod'
+                                            data-name="${user.name ? user.name : ''}"
+                                            data-id="${user.id ? user.id : ''}"
+                                            data-email="${user.email ? user.email : ''}"
+                                            data-age="${user.age ? user.age : ''}"
+                                            data-roles="${user.roles.reduce((s, i) => s + i.name + ", ", "")}">Редактировать
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btndel" data-bs-toggle="modal"
+                                            data-bs-target='#del'
+                                            data-name="${user.name}"
+                                            data-id="${user.id}"
+                                            data-email="${user.email}"
+                                            data-age="${user.age}"
+                                            data-roles="${user.roles.reduce((s, i) => s + i.name + ", ", "")}">Удалить
+                                    </button>
+                                </td>
+                               </tr>`;
+                $(s).appendTo(".tbody");
+            }
+
+            function updateTable() {
+                fetch("http://localhost:8080/api/admin/users", {method: "GET"})
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log("Success:", data);
+                        data.forEach(user => {addUser(user)});
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+
+            $(".tbody").on('click', '.btnmod',
                 function () {
                     var id = $(this).attr('data-id');
                     var name = $(this).attr('data-name');
@@ -29,7 +104,7 @@
                     role.forEach(i => $('#' + i).prop('checked', true));
                 })
 
-            $(".btndel").click(
+            $(".tbody").on('click', '.btndel',
                 function () {
                     var id = $(this).attr('data-id');
                     var name = $(this).attr('data-name');
@@ -46,8 +121,79 @@
                     let role = roles.replaceAll("[", "").replaceAll("]", "").split(", ");
                     role.forEach(i => $('#del' + i).prop('checked', true));
                 })
+            $("#addForm").on('submit', function (e) {
+                let formData = new FormData($(this)[0]);
+                console.log(...formData)
+                formData.delete("roles");
+                let roles = new Array();
+                this.querySelectorAll('input[name=roles]:checked').forEach(element => {
+                    roles.push(element.value)
+                })
+                let obj = {};
+                formData.forEach((value, key) => obj[key] = value);
+                obj["roles"] = [];
+                roles.forEach(i => obj["roles"].push({"id": i}));
+                let json = JSON.stringify(obj);
+                console.log(json);
+                fetch("http://localhost:8080/api/admin/add", {
+                    method: "POST", // or 'PUT'
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: json,
+                })
+                    .then((response) => response.json())
+                    .then((user) => {
+                        console.log("Success:", user);
+                        fetch("http://localhost:8080/api/admin/user/"+user.id, {method: "GET"})
+                            .then((response) => response.json())
+                            .then((data) => {
+                                console.log("Success:", data);
+                                addUser(data);
+                            })
+                            .catch((error) => {
+                                console.error("Error:", error);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            })
+            $("#deleteForm").on('submit', function (e) {
+                let formData = new FormData($(this)[0]);
+                console.log(...formData)
+                formData.delete("roles");
+                let roles = [];
+                this.querySelectorAll('input[name=roles]:checked').forEach(element => {
+                    roles.push(element.value)
+                })
+                let obj = {};
+                formData.forEach((value, key) => obj[key] = value);
+                obj["roles"] = [];
+                roles.forEach(i => obj["roles"].push({"id": i}));
+                let json = JSON.stringify(obj);
+                console.log(json);
+                fetch("http://localhost:8080/api/admin/delete", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: json,
+                })
+                    .then((response) => response.json())
+                    .then((user) => {
+                        console.log("Success:", user);
+                        let tr = document.getElementById('tr'+user.id);
+                        tr.parentNode.removeChild(tr);
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            })
         });
     </script>
+
+
 </head>
 <body>
 
@@ -107,74 +253,47 @@
                             <th scope="col">Удалить</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <th:block th:each="user : ${users}">
-                            <tr>
-                                <th scope="row" th:text="${user.id}"></th>
-                                <td th:text="${user.name}"></td>
-                                <td th:text="${user.age}"></td>
-                                <td th:text="${user.email}"></td>
-                                <td th:text="${user.roles}"></td>
-                                <td>
-                                    <button type="button" class="btn btn-info btnmod" data-bs-toggle="modal"
-                                            data-bs-target='#mod'
-                                            th:attr="data-name=${user.name},
-                                            data-id=${user.id},
-                                            data-email=${user.email},
-                                            data-age=${user.age},
-                                            data-pass=${user.password},
-                                            data-roles=${user.roles}">Редактировать
-                                    </button>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btndel" data-bs-toggle="modal"
-                                            data-bs-target='#del'
-                                            th:attr="data-name=${user.name},
-                                            data-id=${user.id},
-                                            data-email=${user.email},
-                                            data-age=${user.age},
-                                            data-pass=${user.password},
-                                            data-roles=${user.roles}">Удалить
-                                    </button>
-                                </td>
-                            </tr>
-                        </th:block>
+                        <tbody class="tbody">
+
                         </tbody>
                     </table>
                 </div>
 
                 <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                     <br>
-                    <form action="#" th:action="@{/admin/add}" th:object="${newUser}" method="post">
+                    <form id="addForm" onsubmit="return false">
                         <div class="row mb-3">
                             <label for="inputNik" class="col-sm-2 col-form-label">Никнейм</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="inputNik" th:field="*{name}">
+                                <input type="text" class="form-control" id="inputNik" name="name">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="inputAge" class="col-sm-2 col-form-label">Возраст</label>
                             <div class="col-sm-10">
-                                <input type="number" class="form-control" id="inputAge" th:field="*{age}">
+                                <input type="number" class="form-control" id="inputAge" name="age">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
                             <div class="col-sm-10">
-                                <input type="email" class="form-control" id="inputEmail" th:field="*{email}">
+                                <input type="email" class="form-control" id="inputEmail" name="email">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
                             <div class="col-sm-10">
-                                <input type="password" class="form-control" id="inputPassword" th:field="*{password}">
+                                <input type="password" class="form-control" id="inputPassword" name="password">
                             </div>
                         </div>
 
-                        <div class="form-check form-check-inline" th:each="role : ${allRoles}">
-                            <input class="form-check-input" type="checkbox" th:value="${role.id}"
-                                   th:field="*{roles}">
-                            <label class="form-check-label" th:text="${role.name}"></label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="roles" value="1">
+                            <label class="form-check-label">USER</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="roles" value="2">
+                            <label class="form-check-label">ADMIN</label>
                         </div>
 
                         <br>
@@ -255,44 +374,48 @@
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form action="#" th:action="@{/admin/delete}" th:object="${newUser}" th:method="DELETE">
+            <form id="deleteForm" onsubmit="return false">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Modal title</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Удалить пользователя</h5>
                 </div>
                 <div class="modal-body">
 
                     <div class="row mb-3">
                         <label for="deleteID" class="col-sm-2 col-form-label">ID</label>
                         <div class="col-sm-10">
-                            <input type="text" th:field="*{id}" class="form-control id" id="deleteID" readonly>
+                            <input type="text" class="form-control id" name="id" id="deleteID" readonly>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label for="deleteNik" class="col-sm-2 col-form-label">Никнейм</label>
                         <div class="col-sm-10">
-                            <input type="text" th:field="*{name}" class="form-control name" id="deleteNik" readonly>
+                            <input type="text" class="form-control name" name="name" id="deleteNik" readonly>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label for="deleteAge" class="col-sm-2 col-form-label">Возраст</label>
                         <div class="col-sm-10">
-                            <input type="number" th:field="*{age}" class="form-control age" id="deleteAge" readonly>
+                            <input type="number" class="form-control age" name="age" id="deleteAge" readonly>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label for="deleteEmail" class="col-sm-2 col-form-label">Email</label>
                         <div class="col-sm-10">
-                            <input type="email" th:field="*{email}" class="form-control email" id="deleteEmail" readonly>
+                            <input type="email" class="form-control email" name="email" id="deleteEmail"
+                                   readonly>
                         </div>
                     </div>
 
-                    <div class="form-check form-check-inline" th:each="role : ${allRoles}">
-                        <input class="form-check-input role" type="checkbox" disabled="disabled" th:value="${role.id}"
-                               th:field="*{roles}" th:id="'del'+${role.name}" readonly>
-                        <label class="form-check-label" th:text="${role.name}"></label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" id="delROLE_USER" type="checkbox" name="roles" value="1">
+                        <label class="form-check-label">USER</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" id="delROLE_ADMIN" type="checkbox" name="roles" value="2">
+                        <label class="form-check-label">ADMIN</label>
                     </div>
 
                 </div>
