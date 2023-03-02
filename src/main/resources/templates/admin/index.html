@@ -129,7 +129,7 @@
                     .then((response) => response.json())
                     .then((user) => {
                         console.log("Success:", user);
-                        fetch("http://localhost:8080/api/user/user/"+user.id, {method: "GET"})
+                        fetch("http://localhost:8080/api/admin/user/"+user.id, {method: "GET"})
                             .then((response) => response.json())
                             .then((data) => {
                                 console.log("Success:", data);
