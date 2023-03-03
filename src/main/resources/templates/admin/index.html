@@ -10,233 +10,6 @@
             crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
-    <!--    Заполнение модального окна для изменения данных пользователя-->
-    <script>
-        $(function () {
-            $(document).ready(function () {
-                fetch("http://localhost:8080/api/user/user", {method: "GET"})
-                    .then((response) => response.json())
-                    .then((user) => {
-                        console.log("Success:", user);
-                        $("#currentUser").html(user.name + ' с правами: ' + user.roles.reduce((s,i) => s + ' ' + i.name.replaceAll("ROLE_", ""), ''));
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-                $("#currentUser").html()
-                updateTable();
-            })
-
-            function addUser(user) {
-                const s = `<tr id="${'tr' + user.id}">
-                                   <th>${user.id}</th>
-                                   <td id="${'name' + user.id}">${user.name}</td>
-                                   <td id="${'age' + user.id}">${user.age}</td>
-                                   <td id="${'email' + user.id}">${user.email}</td>
-                                   <td id="${'roles' + user.id}">${user.roles.reduce((s, i) => s + i.name.replaceAll("ROLE_", "") + " ", "")}</td>
-                                   <td>
-                                    <button type="button" class="btn btn-info btnmod" data-bs-toggle="modal"
-                                            data-bs-target="#mod"
-                                            data-name="${user.name}"
-                                            data-id="${user.id}"
-                                            data-email="${user.email}"
-                                            data-age="${user.age}"
-                                            data-roles="${user.roles.reduce((s, i) => s + i.name + ", ", "")}">Редактировать
-                                    </button>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btndel" data-bs-toggle="modal"
-                                            data-bs-target='#del'
-                                            data-name="${user.name}"
-                                            data-id="${user.id}"
-                                            data-email="${user.email}"
-                                            data-age="${user.age}"
-                                            data-roles="${user.roles.reduce((s, i) => s + i.name + ", ", "")}">Удалить
-                                    </button>
-                                </td>
-                               </tr>`;
-                $(s).appendTo(".tbody");
-            }
-
-            function updateTable() {
-                fetch("http://localhost:8080/api/admin/users", {method: "GET"})
-                    .then((response) => response.json())
-                    .then((data) => {
-                        console.log("Success:", data);
-                        data.forEach(user => {addUser(user)});
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-            }
-
-            $(".tbody").on('click', '.btnmod',
-                function () {
-                    var id = $(this).attr('data-id');
-                    var name = $(this).attr('data-name');
-                    var email = $(this).attr('data-email');
-                    var age = $(this).attr('data-age');
-                    var roles = $(this).attr('data-roles');
-
-                    $(".id").attr('value', id);
-                    $(".name").attr('value', name);
-                    $(".email").attr('value', email);
-                    $(".age").attr('value', age);
-
-                    $(".role").prop('checked', false);
-                    let role = roles.replaceAll("[", "").replaceAll("]", "").split(", ");
-                    role.forEach(i => $('#mod' + i).prop('checked', true));
-                })
-
-            $(".tbody").on('click', '.btndel',
-                function () {
-                    var id = $(this).attr('data-id');
-                    var name = $(this).attr('data-name');
-                    var email = $(this).attr('data-email');
-                    var age = $(this).attr('data-age');
-                    var roles = $(this).attr('data-roles');
-
-                    $(".id").attr('value', id);
-                    $(".name").attr('value', name);
-                    $(".email").attr('value', email);
-                    $(".age").attr('value', age);
-
-                    $(".role").prop('checked', false);
-                    let role = roles.replaceAll("[", "").replaceAll("]", "").split(", ");
-                    role.forEach(i => $('#del' + i).prop('checked', true));
-                })
-            $("#addForm").on('submit', function (e) {
-                let formData = new FormData($(this)[0]);
-                console.log(...formData)
-                formData.delete("roles");
-                let roles = new Array();
-                this.querySelectorAll('input[name=roles]:checked').forEach(element => {
-                    roles.push(element.value)
-                })
-                let obj = {};
-                formData.forEach((value, key) => obj[key] = value);
-                obj["roles"] = [];
-                roles.forEach(i => obj["roles"].push({"id": i}));
-                let json = JSON.stringify(obj);
-                console.log(json);
-                fetch("http://localhost:8080/api/admin/add", {
-                    method: "POST", // or 'PUT'
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: json,
-                })
-                    .then((response) => response.json())
-                    .then((user) => {
-                        console.log("Success:", user);
-                        fetch("http://localhost:8080/api/admin/user/"+user.id, {method: "GET"})
-                            .then((response) => response.json())
-                            .then((data) => {
-                                console.log("Success:", data);
-                                addUser(data);
-                            })
-                            .catch((error) => {
-                                console.error("Error:", error);
-                            });
-                        e.target.reset();
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-            })
-            $("#deleteForm").on('submit', function (e) {
-                let formData = new FormData($(this)[0]);
-                console.log(...formData)
-                formData.delete("roles");
-                let roles = [];
-                this.querySelectorAll('input[name=roles]:checked').forEach(element => {
-                    roles.push(element.value)
-                })
-                let obj = {};
-                formData.forEach((value, key) => obj[key] = value);
-                obj["roles"] = [];
-                roles.forEach(i => obj["roles"].push({"id": i}));
-                let json = JSON.stringify(obj);
-                console.log(json);
-                fetch("http://localhost:8080/api/admin/delete", {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: json,
-                })
-                    .then((response) => response.json())
-                    .then((user) => {
-                        console.log("Success:", user);
-                        let tr = document.getElementById('tr'+user.id);
-                        tr.parentNode.removeChild(tr);
-                        e.target.reset();
-                        $("#del").modal('hide');
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-            })
-            $("#editForm").on('submit', function (e) {
-                let formData = new FormData($(this)[0]);
-                console.log(...formData)
-                formData.delete("roles");
-                let roles = [];
-                this.querySelectorAll('input[name=roles]:checked').forEach(element => {
-                    roles.push(element.value)
-                })
-                let obj = {};
-                formData.forEach((value, key) => obj[key] = value);
-                obj["roles"] = [];
-                roles.forEach(i => obj["roles"].push({"id": i, "name": i==1?"ROLE_USER":"ROLE_ADMIN"}));
-                let json = JSON.stringify(obj);
-                console.log(json);
-                fetch("http://localhost:8080/api/admin/edit", {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: json,
-                })
-                    .then((response) => response.json())
-                    .then((user) => {
-                        console.log("Success:", user);
-                        let s = `<th>${user.id}</th>
-                                   <td id="${'name' + user.id}">${user.name}</td>
-                                   <td id="${'age' + user.id}">${user.age}</td>
-                                   <td id="${'email' + user.id}">${user.email}</td>
-                                   <td id="${'roles' + user.id}">${user.roles.reduce((s, i) => s + i.name.replaceAll("ROLE_", "") + " ", "")}</td>
-                                   <td>
-                                    <button type="button" class="btn btn-info btnmod" data-bs-toggle="modal"
-                                            data-bs-target="#mod"
-                                            data-name="${user.name}"
-                                            data-id="${user.id}"
-                                            data-email="${user.email}"
-                                            data-age="${user.age}"
-                                            data-roles="${user.roles.reduce((s, i) => s + i.name + ", ", "")}">Редактировать
-                                    </button>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btndel" data-bs-toggle="modal"
-                                            data-bs-target='#del'
-                                            data-name="${user.name}"
-                                            data-id="${user.id}"
-                                            data-email="${user.email}"
-                                            data-age="${user.age}"
-                                            data-roles="${user.roles.reduce((s, i) => s + i.name + ", ", "")}">Удалить
-                                    </button>
-                                </td>`;
-                        $("#tr"+user.id).html(s);
-                        e.target.reset();
-                        $("#mod").modal('hide');
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-            })
-        });
-    </script>
-
 
 </head>
 <body>
@@ -332,12 +105,12 @@
                         </div>
 
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="roles" value="1">
-                            <label class="form-check-label">USER</label>
+                            <input id="addFormUser" class="form-check-input" type="checkbox" name="roles" value="1">
+                            <label for="addFormUser" class="form-check-label">USER</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="roles" value="2">
-                            <label class="form-check-label">ADMIN</label>
+                            <input id="addFormAdmin" class="form-check-input" type="checkbox" name="roles" value="2">
+                            <label for="addFormAdmin" class="form-check-label">ADMIN</label>
                         </div>
 
                         <br>
@@ -398,11 +171,11 @@
 
                     <div class="form-check form-check-inline">
                         <input id="modROLE_USER"  class="form-check-input role" type="checkbox" name="roles" value="1">
-                        <label class="form-check-label">USER</label>
+                        <label for="modROLE_USER" class="form-check-label">USER</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input id="modROLE_ADMIN" class="form-check-input role" type="checkbox" name="roles" value="2">
-                        <label class="form-check-label">ADMIN</label>
+                        <label for="modROLE_ADMIN" class="form-check-label">ADMIN</label>
                     </div>
 
                 </div>
@@ -458,11 +231,11 @@
 
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" id="delROLE_USER" type="checkbox" name="roles" value="1" disabled="disabled">
-                        <label class="form-check-label">USER</label>
+                        <label for="delROLE_USER" class="form-check-label">USER</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" id="delROLE_ADMIN" type="checkbox" name="roles" value="2" disabled="disabled">
-                        <label class="form-check-label">ADMIN</label>
+                        <label for="delROLE_ADMIN" class="form-check-label">ADMIN</label>
                     </div>
 
                 </div>
@@ -474,6 +247,6 @@
         </div>
     </div>
 </div>
-
+<script th:src="@{/adminScript.js}"></script>
 </body>
 </html>
